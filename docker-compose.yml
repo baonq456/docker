@@ -1,0 +1,63 @@
+version: '3'
+
+services:
+  mysql-5:
+    build:
+      context: .
+      dockerfile: ./mysql-5/Dockerfile
+    restart: always
+    hostname: local-mysql-5
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+    volumes:
+      - dbdata:/var/lib/mysql
+    ports:
+      - $MYSQL_5_PORT:3306
+    container_name: mysql-5
+    networks:
+      - local_network
+
+  mysql-8:
+    build:
+      context: .
+      dockerfile: ./mysql-8/Dockerfile
+    restart: always
+    hostname: local-mysql-8
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      # MYSQL_USER: root
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_TCP_PORT: 3307
+    volumes:
+      - dbdata-8:/var/lib/mysql
+    ports:
+      - $MYSQL_8_PORT:3307
+    container_name: mysql-8
+    networks:
+      - local_network
+
+  redis-7:
+    networks:
+      - local_network
+    hostname: local-redis
+    image: redis:latest
+    ports:
+      - $REDIS_PORT:6379
+    command: redis-server --appendonly yes --requirepass $REDIS_PASSWORD
+    volumes:
+      - redis-data:/data
+    container_name: redis
+    
+volumes:
+  dbdata:
+  dbdata-8:
+  rabbit-data:
+  redis-data:
+
+networks:
+  local_network:
+    driver: bridge
